@@ -29,7 +29,7 @@ export const createTransaction = async (req: any, res: Response) => {
     let fileUrl: string | undefined = undefined;
 
     if (req.file) {
-        fileUrl = `/uploads/${req.file.filename}`;
+        fileUrl = `http://localhost:5000/uploads/${req.file.filename}`;
     }
 
     const txn = await Transaction.create({
