@@ -162,7 +162,7 @@ function List() {
             )}
             {filtered.map((t) => (
               <tr key={t.id} className="border-b border-border/40 last:border-none">
-                <td className="p-3">{t.date}</td>
+                <td className="p-3">{new Date(t.date).toLocaleDateString("en-GB")}</td>
                 <td className="p-3 font-medium">
                   {t.category}
                   {t.description && <div className="text-xs text-muted-foreground">{t.description}</div>}

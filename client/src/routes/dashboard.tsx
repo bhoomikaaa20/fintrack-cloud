@@ -107,7 +107,7 @@ function DashboardInner() {
                             <li key={t.id} className="flex items-center justify-between py-3 text-sm">
                                 <div>
                                     <div className="font-medium">{t.category}</div>
-                                    <div className="text-xs text-muted-foreground">{t.date}</div>
+                                    <div className="text-xs text-muted-foreground">{new Date(t.date).toLocaleDateString("en-GB")}</div>
                                 </div>
                                 <div className="flex items-center gap-3">
                                     {t.status === "high" && (

@@ -126,7 +126,7 @@ function TxnTable({ rows, userMap }: { rows: Txn[]; userMap: Map<string, UserRow
             const u = userMap.get(t.user_id);
             return (
               <tr key={t.id} className="border-b border-border/40 last:border-none">
-                <td className="p-3">{t.date}</td>
+                <td className="p-3">{new Date(t.date).toLocaleDateString("en-GB")}</td>
                 <td className="p-3">
                   <div className="font-medium">{u?.name ?? "—"}</div>
                   <div className="text-xs text-muted-foreground">{u?.email}</div>
