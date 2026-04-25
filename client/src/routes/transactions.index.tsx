@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { AppShell } from "@/components/AppShell";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,12 +36,17 @@ function List() {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
 
-  const load = () => {
-    supabase
-      .from("transactions")
-      .select("*")
-      .order("date", { ascending: false })
-      .then(({ data }) => setTxns((data ?? []) as Txn[]));
+  const load = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/transactions", {
+        credentials: "include",
+      });
+
+      const data = await res.json();
+      setTxns(data.transactions || []);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   useEffect(() => {
@@ -61,10 +65,21 @@ function List() {
   }, [txns, q, type, status, from, to]);
 
   async function remove(id: string) {
-    const { error } = await supabase.from("transactions").delete().eq("id", id);
-    if (error) return toast.error(error.message);
-    toast.success("Deleted");
-    load();
+    try {
+      const res = await fetch(`http://localhost:5000/api/transactions/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message);
+
+      toast.success("Deleted");
+      load();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Delete failed");
+    }
   }
 
   function exportCsv() {

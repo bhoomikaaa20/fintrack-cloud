@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
@@ -26,10 +25,23 @@ function Admin() {
 
   useEffect(() => {
     if (!isAdmin) return;
-    supabase.from("profiles").select("*").order("created_at", { ascending: false })
-      .then(({ data }) => setUsers((data ?? []) as UserRow[]));
-    supabase.from("transactions").select("*").order("date", { ascending: false })
-      .then(({ data }) => setTxns((data ?? []) as Txn[]));
+
+    async function fetchData() {
+      try {
+        const res = await fetch("http://localhost:5000/api/admin", {
+          credentials: "include",
+        });
+
+        const data = await res.json();
+
+        setUsers(data.users || []);
+        setTxns(data.transactions || []);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    fetchData();
   }, [isAdmin]);
 
   const userMap = new Map(users.map((u) => [u.id, u]));

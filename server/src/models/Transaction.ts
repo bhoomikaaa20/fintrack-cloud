@@ -1,0 +1,25 @@
+import mongoose, { Document } from "mongoose";
+
+export interface ITransaction extends Document {
+    user: string;
+    amount: number;
+    type: "income" | "expense";
+    category: string;
+    date: Date;
+    status: "normal" | "high";
+    description: String,
+    file_url: String,
+}
+
+const transactionSchema = new mongoose.Schema({
+    user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    amount: Number,
+    type: { type: String, enum: ["income", "expense"] },
+    category: String,
+    date: Date,
+    description: String,
+    file_url: String,
+    status: { type: String, enum: ["normal", "high"], default: "normal" },
+});
+
+export default mongoose.model<ITransaction>("Transaction", transactionSchema);

@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { AppShell } from "@/components/AppShell";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,30 +33,38 @@ function NewTxn() {
   async function submit(e: FormEvent) {
     e.preventDefault();
     if (!user) return;
+
     const amt = parseFloat(amount);
     if (isNaN(amt) || amt < 0) return toast.error("Enter a valid amount");
+
     setLoading(true);
+
     try {
-      let fileUrl: string | null = null;
+      const formData = new FormData();
+      formData.append("amount", String(amt));
+      formData.append("type", type);
+      formData.append("category", category);
+      formData.append("date", date);
+      formData.append("description", description);
+
       if (file) {
-        const path = `${user.id}/${Date.now()}-${file.name}`;
-        const { error: upErr } = await supabase.storage.from("receipts").upload(path, file);
-        if (upErr) throw upErr;
-        const { data: pub } = supabase.storage.from("receipts").getPublicUrl(path);
-        fileUrl = pub.publicUrl;
+        formData.append("file", file);
       }
-      const { error } = await supabase.from("transactions").insert({
-        user_id: user.id,
-        amount: amt,
-        type,
-        category,
-        date,
-        description: description || null,
-        file_url: fileUrl,
+
+      const res = await fetch("http://localhost:5000/api/transactions", {
+        method: "POST",
+        credentials: "include",
+        body: formData,
       });
-      if (error) throw error;
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message);
+
       toast.success(amt > 50000 ? "Saved — flagged as HIGH value" : "Transaction saved");
+
       navigate({ to: "/transactions" });
+
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to save");
     } finally {
